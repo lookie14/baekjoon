@@ -1,88 +1,62 @@
 #include<iostream>
 #include<queue>
-
 using namespace std;
 
 int arr[1001][1001];
-bool check[1001][1001];
-int ans[1001][1001];
+int dist[1001][1001];
+queue<pair<int, int>> Q;
 int n, m;
+int dx[4] = { 1,-1,0,0 };
+int dy[4] = { 0,0,1,-1 };
 
-struct pt {
-	int x, y;
-};
-
-pt start;
-queue <pt> Q;
-
-void dfs(pt a) {
-	Q.push(a);
-	while (!Q.empty()) {
-		int X = Q.front().x;
-		int Y = Q.front().y;
-		Q.pop();
-		if (Y - 1 > 0 && check[Y - 1][X] != true) {  //상
-			ans[Y - 1][X] = ans[Y][X] + 1;
-			check[Y - 1][X] = true;
-			pt np = { X ,Y - 1 };
-			Q.push(np);
-		}
-		if (Y + 1 <= n && check[Y + 1][X] != true) {  //하
-			ans[Y + 1][X] = ans[Y][X] + 1;
-			check[Y + 1][X] = true;
-			pt np = { X ,Y + 1 };
-			Q.push(np);
-		}
-		if (X - 1 > 0 && check[Y][X - 1] != true) {  //좌
-			ans[Y][X - 1] = ans[Y][X] + 1;
-			check[Y][X - 1] = true;
-			pt np = { X - 1,Y };
-			Q.push(np);
-		}
-		if (X + 1 <= m && check[Y][X + 1] != true) {  //우
-			ans[Y][X + 1] = ans[Y][X] + 1;
-			check[Y][X + 1] = true;
-			pt np = { X + 1,Y};
-			Q.push(np);
-		}
-	}
+void bfs(int s_x, int s_y) {
+    Q.push(make_pair(s_x, s_y));
+    while (!Q.empty()) {
+        int x = Q.front().first;
+        int y = Q.front().second;
+        Q.pop();
+        for (int i = 0; i < 4; i++) {
+            int new_x = x + dx[i];
+            int new_y = y + dy[i];
+            if (0 <= new_x && new_x < n && 0 <= new_y && new_y < m && arr[new_x][new_y] && dist[new_x][new_y] == 0) {
+                dist[new_x][new_y] = dist[x][y] + 1;
+                Q.push(make_pair(new_x, new_y));
+            }
+        }
+    }
 }
 
 int main() {
-	cin.tie(NULL);
-	ios::sync_with_stdio(false);
-	cin >> n >> m;
+    ios::sync_with_stdio(false);
+    cin.tie(NULL);
+    cin >> n >> m;
+    int r_x, r_y;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cin >> arr[i][j];
+            dist[i][j] = 0;
+            if (arr[i][j] == 2) {
+                r_x = i;
+                r_y = j;
+            }
+        }
+    }
 
-	for (int i = 1; i <= n; i++) {
-		for (int j = 1; j <= m; j++) {
-			cin >> arr[i][j];
-			if (arr[i][j] == 0) {
-				check[i][j] = true;
-				ans[i][j] = 0;
-			}
-			if (arr[i][j] == 2) {
-				start.x = j;
-				start.y = i;
-			}
-		}
-	}
+    bfs(r_x, r_y);
 
-	ans[start.y][start.x] = 0;
-	check[start.y][start.x] = true;
-	dfs(start);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            if (arr[i][j] == 1 && dist[i][j] == 0) dist[i][j] = -1;
+        }
+    }
 
-	for (int i = 1; i <= n; i++) {
-		for (int j = 1; j <= m; j++) {
-			if (check[i][j] != true) ans[i][j] = -1;
-		}
-	}
+    dist[r_x][r_y] = 0;
 
-	for (int i = 1; i <= n; i++) {
-		for (int j = 1; j <= m; j++) {
-			cout << ans[i][j] << " ";
-		}
-		cout << endl;
-	}
-
-	return 0;
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            cout << dist[i][j] << " ";
+        }
+        cout << "\n";
+    }
+    return 0;
 }
